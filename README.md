@@ -4,7 +4,16 @@ A CLI tool by [Deploy Ecommerce](https://www.deploy.co.uk) to migrate a Magento 
 
 ---
 
+## Beta
+
+This is still very much a beta tool and is currently being tested with Magento EE versions 2.4.6 and 2.4.7.
+
+Feature requests, comments and feedback are all very much welcome.
+
+
 ## Disclaimer & Data Loss Warning
+
+
 
 > **THIS TOOL MAKES IRREVERSIBLE CHANGES TO YOUR DATABASE AND PROJECT FILES.**
 
