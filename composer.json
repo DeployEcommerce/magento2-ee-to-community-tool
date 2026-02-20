@@ -1,0 +1,45 @@
+{
+    "name": "deployecommerce/magento2-ee-to-community",
+    "description": "CLI tool to migrate Magento 2 from Enterprise Edition to Community Edition.",
+    "keywords": ["magento", "magento2", "enterprise", "community", "migration"],
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Deploy Ecommerce",
+            "homepage": "https://deployecommerce.com"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "laravel-zero/framework": "^12.0.2"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.25.1",
+        "mockery/mockery": "^1.6.12",
+        "pestphp/pest": "^3.8.4|^4.1.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "bin": ["magento2-ee-to-ce"]
+}
