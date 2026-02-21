@@ -9,6 +9,7 @@ class ComposerAnalyser implements ComposerAnalyserInterface
 {
     private const EE_PACKAGE = 'magento/product-enterprise-edition';
     private const CE_PACKAGE = 'magento/product-community-edition';
+    private const CLOUD_METAPACKAGE = 'magento/magento-cloud-metapackage';
 
     private const EE_DEPENDENT_PACKAGES = [
         'magento/module-staging',
@@ -84,10 +85,25 @@ class ComposerAnalyser implements ComposerAnalyserInterface
 
     public function getPackagesToRemove(ComposerAnalysis $analysis): array
     {
-        if (!$analysis->hasEnterpriseEdition) {
-            return [];
+        $require = $analysis->data['require'] ?? [];
+        $packagesToRemove = [];
+
+        // Remove EE package if present
+        if (isset($require[self::EE_PACKAGE])) {
+            $packagesToRemove[] = self::EE_PACKAGE;
         }
-        return [self::EE_PACKAGE];
+
+        // Remove CE package if present (will be re-added with correct version)
+        if (isset($require[self::CE_PACKAGE])) {
+            $packagesToRemove[] = self::CE_PACKAGE;
+        }
+
+        // Remove Cloud metapackage if present
+        if (isset($require[self::CLOUD_METAPACKAGE])) {
+            $packagesToRemove[] = self::CLOUD_METAPACKAGE;
+        }
+
+        return $packagesToRemove;
     }
 
     public function getPackagesToAdd(ComposerAnalysis $analysis): array

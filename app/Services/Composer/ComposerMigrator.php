@@ -7,17 +7,17 @@ use App\ValueObjects\ComposerAnalysis;
 
 class ComposerMigrator
 {
-    private const EE_PACKAGE = 'magento/product-enterprise-edition';
-
     public function migrate(string $composerJsonPath, ComposerAnalysis $analysis): void
     {
         $data = $analysis->data;
-
-        // Remove EE package from require
-        unset($data['require'][self::EE_PACKAGE]);
-
-        // Add CE packages
         $analyser = new ComposerAnalyser();
+
+        // Remove EE, CE (if present), and Cloud metapackage from require
+        foreach ($analyser->getPackagesToRemove($analysis) as $package) {
+            unset($data['require'][$package]);
+        }
+
+        // Add CE package with correct version
         $packagesToAdd = $analyser->getPackagesToAdd($analysis);
         foreach ($packagesToAdd as $package => $version) {
             $data['require'][$package] = $version;
