@@ -34,7 +34,7 @@ class VerifyCommand extends BaseCommand
 
         $magentoPath = $this->resolver->resolve($this->option('path'));
 
-        $envPhp = include $magentoPath . '/app/etc/env.php';
+        $envPhp = include $magentoPath.'/app/etc/env.php';
         $config = DatabaseConfig::fromEnvPhp($envPhp);
         $this->connection->connect($config);
 
@@ -43,13 +43,14 @@ class VerifyCommand extends BaseCommand
 
         // Load before snapshot
         $snapshotPath = $this->option('snapshot');
-        if (!$snapshotPath) {
+        if (! $snapshotPath) {
             $snapshotPath = $this->findLatestBeforeSnapshot();
         }
 
-        if (!$snapshotPath || !file_exists($snapshotPath)) {
+        if (! $snapshotPath || ! file_exists($snapshotPath)) {
             $this->warn('No before-snapshot found. Running verification without comparison.');
             $this->reportSnapshotStatus($after->eeTablesPresent, $after->rowIdColumnsPresent, $after->sequenceTablesPresent);
+
             return $this->assertEmpty($after->eeTablesPresent, $after->rowIdColumnsPresent, $after->sequenceTablesPresent)
                 ? self::SUCCESS
                 : self::FAILURE;
@@ -68,13 +69,13 @@ class VerifyCommand extends BaseCommand
         $this->newLine();
 
         // Quick pass/fail checks
-        $eeCount    = count($diff['eeTablesRemaining']);
+        $eeCount = count($diff['eeTablesRemaining']);
         $rowIdCount = count($diff['rowIdColumnsRemaining']);
-        $seqCount   = count($diff['sequenceTablesRemaining']);
+        $seqCount = count($diff['sequenceTablesRemaining']);
 
-        $this->renderCheck('EE-specific tables removed',  $eeCount === 0,    $eeCount    === 0 ? "All {$diff['eeTablesRemovedCount']} EE tables dropped"              : "{$eeCount} EE table(s) still present: "     . implode(', ', array_slice($diff['eeTablesRemaining'], 0, 5)));
-        $this->renderCheck('row_id columns removed',      $rowIdCount === 0, $rowIdCount === 0 ? 'No row_id columns remaining'                                        : "{$rowIdCount} table(s) still have row_id: " . implode(', ', array_slice($diff['rowIdColumnsRemaining'], 0, 5)));
-        $this->renderCheck('EE sequence tables removed',  $seqCount === 0,   $seqCount   === 0 ? 'All EE staging sequence tables dropped'                             : "{$seqCount} EE sequence table(s) still present");
+        $this->renderCheck('EE-specific tables removed', $eeCount === 0, $eeCount === 0 ? "All {$diff['eeTablesRemovedCount']} EE tables dropped" : "{$eeCount} EE table(s) still present: ".implode(', ', array_slice($diff['eeTablesRemaining'], 0, 5)));
+        $this->renderCheck('row_id columns removed', $rowIdCount === 0, $rowIdCount === 0 ? 'No row_id columns remaining' : "{$rowIdCount} table(s) still have row_id: ".implode(', ', array_slice($diff['rowIdColumnsRemaining'], 0, 5)));
+        $this->renderCheck('EE sequence tables removed', $seqCount === 0, $seqCount === 0 ? 'All EE staging sequence tables dropped' : "{$seqCount} EE sequence table(s) still present");
 
         // Schema changes summary table
         $this->newLine();
@@ -86,19 +87,19 @@ class VerifyCommand extends BaseCommand
                     'EE-specific tables',
                     count($before->eeTablesPresent),
                     count($after->eeTablesPresent),
-                    $eeCount === 0 ? '<fg=green>-' . $diff['eeTablesRemovedCount'] . ' removed ✓</>' : '<fg=red>' . $eeCount . ' remaining ✗</>',
+                    $eeCount === 0 ? '<fg=green>-'.$diff['eeTablesRemovedCount'].' removed ✓</>' : '<fg=red>'.$eeCount.' remaining ✗</>',
                 ],
                 [
                     'Tables with row_id',
                     count($before->rowIdColumnsPresent),
                     count($after->rowIdColumnsPresent),
-                    $rowIdCount === 0 ? '<fg=green>all cleaned ✓</>' : '<fg=red>' . $rowIdCount . ' remaining ✗</>',
+                    $rowIdCount === 0 ? '<fg=green>all cleaned ✓</>' : '<fg=red>'.$rowIdCount.' remaining ✗</>',
                 ],
                 [
                     'EE staging sequence tables',
                     count($before->sequenceTablesPresent),
                     count($after->sequenceTablesPresent),
-                    $seqCount === 0 ? '<fg=green>-' . count($before->sequenceTablesPresent) . ' removed ✓</>' : '<fg=red>' . $seqCount . ' remaining ✗</>',
+                    $seqCount === 0 ? '<fg=green>-'.count($before->sequenceTablesPresent).' removed ✓</>' : '<fg=red>'.$seqCount.' remaining ✗</>',
                 ],
             ]
         );
@@ -114,8 +115,8 @@ class VerifyCommand extends BaseCommand
             $rows[] = [
                 $table,
                 $delta['before'] ?? 'N/A',
-                $delta['after']  ?? 'N/A',
-                $lost ? '<fg=red>' . sprintf('%+d', $delta['delta']) . ' ✗</>' : '<fg=green>✓</>',
+                $delta['after'] ?? 'N/A',
+                $lost ? '<fg=red>'.sprintf('%+d', $delta['delta']).' ✗</>' : '<fg=green>✓</>',
             ];
         }
 
@@ -127,30 +128,31 @@ class VerifyCommand extends BaseCommand
             $this->newLine();
         }
 
-        if ($passed && !$dataLost) {
+        if ($passed && ! $dataLost) {
             $this->info('✓ VERIFICATION PASSED — Migration completed successfully.');
         } else {
             $this->error('✗ VERIFICATION FAILED — Migration may be incomplete.');
         }
 
-        return ($passed && !$dataLost) ? self::SUCCESS : self::FAILURE;
+        return ($passed && ! $dataLost) ? self::SUCCESS : self::FAILURE;
     }
 
     private function findLatestBeforeSnapshot(): ?string
     {
-        $files = glob(getcwd() . '/snapshot-before-*.json');
-        if (!$files) {
+        $files = glob(getcwd().'/snapshot-before-*.json');
+        if (! $files) {
             return null;
         }
         sort($files);
+
         return end($files);
     }
 
     private function reportSnapshotStatus(array $eeTables, array $rowIdCols, array $seqTables): void
     {
-        $this->renderCheck('EE-specific tables removed', count($eeTables) === 0, count($eeTables) . ' EE tables remaining');
-        $this->renderCheck('row_id columns removed', count($rowIdCols) === 0, count($rowIdCols) . ' row_id columns remaining');
-        $this->renderCheck('sequence_* tables removed', count($seqTables) === 0, count($seqTables) . ' sequence_* tables remaining');
+        $this->renderCheck('EE-specific tables removed', count($eeTables) === 0, count($eeTables).' EE tables remaining');
+        $this->renderCheck('row_id columns removed', count($rowIdCols) === 0, count($rowIdCols).' row_id columns remaining');
+        $this->renderCheck('sequence_* tables removed', count($seqTables) === 0, count($seqTables).' sequence_* tables remaining');
     }
 
     private function assertEmpty(array $eeTables, array $rowIdCols, array $seqTables): bool

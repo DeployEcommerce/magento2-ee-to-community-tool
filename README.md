@@ -179,7 +179,22 @@ Updates `composer.json` to switch from EE to CE:
 ./magento2-ee-to-ce composer:migrate --path=/var/www/magento --dry-run
 ```
 
-If the tool detects any known EE-dependent packages in `composer.json`, it will warn you about potential conflicts before making changes.
+**Conflict and repository detection**
+
+The tool will warn you about:
+
+- **EE-dependent packages** — packages like `magento/module-staging` that won't be available in CE
+- **Enterprise repositories** — repository URLs like `composer.amasty.com/enterprise/` that may need switching to community equivalents
+
+Example warning output:
+
+```
+Enterprise repositories detected:
+  ⚠ Found in composer.json: composer.amasty.com/enterprise/
+    Amasty Enterprise repository - may need to switch to community version
+
+  ℹ These repositories may need to be updated to their community equivalents.
+```
 
 **Options**
 
@@ -219,6 +234,90 @@ The verification report also shows before/after row counts for key tables (`cata
 |---|---|
 | `--path=<dir>` | Path to the Magento root directory |
 | `--snapshot=<path>` | Path to a specific before-snapshot JSON file |
+| `--accept-terms` | Skip the disclaimer prompt |
+
+---
+
+### `scan:row-id`
+
+Scans your codebase for `row_id` references that may need updating after migration. The EE staging/versioning system uses `row_id` as a primary key pattern — any custom or third-party extensions referencing `row_id` will break after migration to CE.
+
+```bash
+# Scan both app/code and vendor directories
+./magento2-ee-to-ce scan:row-id --path=/var/www/magento
+
+# Scan only custom extensions (app/code)
+./magento2-ee-to-ce scan:row-id:custom --path=/var/www/magento
+
+# Scan only third-party extensions (vendor, excluding magento/*)
+./magento2-ee-to-ce scan:row-id:vendor --path=/var/www/magento
+```
+
+**Output formats**
+
+The default output groups results by extension with file:line references:
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│  Custom Extensions (app/code)                                  │
+└────────────────────────────────────────────────────────────────┘
+
+⚠ Vendor_CustomModule (3 references)
+   → Model/Product.php:45
+   → Plugin/StagingPlugin.php:23
+   → Plugin/StagingPlugin.php:67
+
+┌────────────────────────────────────────────────────────────────┐
+│  Third-Party Extensions (vendor/)                              │
+└────────────────────────────────────────────────────────────────┘
+
+⚠ amasty/module-special-promo (2 references)
+   → Model/Rule.php:112
+   → Model/Rule.php:156
+```
+
+Use `--json` or `--markdown` for machine-readable or documentation-friendly output:
+
+```bash
+# JSON output (for piping to jq or other tools)
+./magento2-ee-to-ce scan:row-id --path=/var/www/magento --json --accept-terms
+
+# Markdown output (for reports/documentation)
+./magento2-ee-to-ce scan:row-id --path=/var/www/magento --markdown --accept-terms > row_id_report.md
+```
+
+**JSON output format:**
+
+```json
+[
+    {
+        "file": "/var/www/magento/app/code/Vendor/Module/Model/Product.php",
+        "line": 45,
+        "extension": "Vendor_Module"
+    }
+]
+```
+
+**Markdown output format:**
+
+```markdown
+# row_id References
+
+Found **2** references that may need updating after EE to CE migration.
+
+| Extension | File | Line |
+|-----------|------|------|
+| Vendor_Module | `/var/www/magento/app/code/Vendor/Module/Model/Product.php` | 45 |
+| amasty/promo | `/var/www/magento/vendor/amasty/promo/Rule.php` | 112 |
+```
+
+**Options**
+
+| Option | Description |
+|---|---|
+| `--path=<dir>` | Path to the Magento root directory |
+| `--json` | Output results as JSON |
+| `--markdown` | Output results as Markdown |
 | `--accept-terms` | Skip the disclaimer prompt |
 
 ---

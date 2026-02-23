@@ -11,9 +11,9 @@ class MagentoPathResolver implements MagentoPathResolverInterface
         $path = $pathOption ?? getcwd();
         $path = rtrim((string) $path, '/');
 
-        $envPhp = $path . '/app/etc/env.php';
+        $envPhp = $path.'/app/etc/env.php';
 
-        if (!file_exists($envPhp)) {
+        if (! file_exists($envPhp)) {
             throw new \RuntimeException(
                 "Not a valid Magento root: app/etc/env.php not found at [{$path}]"
             );

@@ -8,8 +8,18 @@ use App\ValueObjects\ComposerAnalysis;
 class ComposerAnalyser implements ComposerAnalyserInterface
 {
     private const EE_PACKAGE = 'magento/product-enterprise-edition';
+
     private const CE_PACKAGE = 'magento/product-community-edition';
+
     private const CLOUD_METAPACKAGE = 'magento/magento-cloud-metapackage';
+
+    /**
+     * Repository URL patterns that indicate enterprise-only access.
+     * These repositories typically require changing to community equivalents after migration.
+     */
+    private const ENTERPRISE_REPOSITORY_PATTERNS = [
+        'composer.amasty.com/enterprise/' => 'Amasty Enterprise repository - may need to switch to community version',
+    ];
 
     private const EE_DEPENDENT_PACKAGES = [
         'magento/module-staging',
@@ -33,7 +43,7 @@ class ComposerAnalyser implements ComposerAnalyserInterface
 
     public function analyse(string $composerJsonPath): ComposerAnalysis
     {
-        if (!file_exists($composerJsonPath)) {
+        if (! file_exists($composerJsonPath)) {
             throw new \InvalidArgumentException("composer.json not found at: {$composerJsonPath}");
         }
 
@@ -44,7 +54,7 @@ class ComposerAnalyser implements ComposerAnalyserInterface
 
         $require = $data['require'] ?? [];
         $eeVersion = $require[self::EE_PACKAGE] ?? '';
-        $hasEe = !empty($eeVersion);
+        $hasEe = ! empty($eeVersion);
 
         $replaceKeys = array_keys($data['replace'] ?? []);
 
@@ -108,7 +118,7 @@ class ComposerAnalyser implements ComposerAnalyserInterface
 
     public function getPackagesToAdd(ComposerAnalysis $analysis): array
     {
-        if (!$analysis->hasEnterpriseEdition) {
+        if (! $analysis->hasEnterpriseEdition) {
             return [];
         }
 
@@ -121,5 +131,38 @@ class ComposerAnalyser implements ComposerAnalyserInterface
     {
         // Strip -pN suffix: e.g. "2.4.7-p8" → "2.4.7", "^2.4.7-p3" → "^2.4.7"
         return preg_replace('/-p\d+$/', '', $version);
+    }
+
+    public function detectEnterpriseRepositories(string $magentoPath): array
+    {
+        $findings = [];
+        $filesToCheck = [
+            'composer.json',
+            'composer.lock',
+        ];
+
+        foreach ($filesToCheck as $filename) {
+            $filePath = $magentoPath.'/'.$filename;
+            if (! file_exists($filePath)) {
+                continue;
+            }
+
+            $content = file_get_contents($filePath);
+            if ($content === false) {
+                continue;
+            }
+
+            foreach (self::ENTERPRISE_REPOSITORY_PATTERNS as $pattern => $message) {
+                if (str_contains($content, $pattern)) {
+                    $findings[] = [
+                        'pattern' => $pattern,
+                        'file' => $filename,
+                        'message' => $message,
+                    ];
+                }
+            }
+        }
+
+        return $findings;
     }
 }

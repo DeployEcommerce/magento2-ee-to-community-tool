@@ -39,7 +39,7 @@ class DatabaseMigrateCommand extends BaseCommand
         $isDryRun = (bool) $this->option('dry-run');
         $fromNumber = (int) ($this->option('from') ?? 1);
 
-        $envPhp = include $magentoPath . '/app/etc/env.php';
+        $envPhp = include $magentoPath.'/app/etc/env.php';
         $config = DatabaseConfig::fromEnvPhp($envPhp);
 
         if ($isDryRun) {
@@ -55,17 +55,18 @@ class DatabaseMigrateCommand extends BaseCommand
         $snapshotPath = $this->snapshot->save($beforeSnapshot, getcwd());
         $this->line("  Snapshot saved: {$snapshotPath}");
 
-        $this->line("  EE tables found: " . count($beforeSnapshot->eeTablesPresent));
-        $this->line("  Tables with row_id: " . count($beforeSnapshot->rowIdColumnsPresent));
-        $this->line("  Sequence tables: " . count($beforeSnapshot->sequenceTablesPresent));
+        $this->line('  EE tables found: '.count($beforeSnapshot->eeTablesPresent));
+        $this->line('  Tables with row_id: '.count($beforeSnapshot->rowIdColumnsPresent));
+        $this->line('  Sequence tables: '.count($beforeSnapshot->sequenceTablesPresent));
         $this->newLine();
 
         if ($isDryRun) {
             $this->info('Dry run complete. Snapshot captured. No SQL executed.');
+
             return self::SUCCESS;
         }
 
-        $this->line("SQL log: " . $this->logger->getLogFilePath());
+        $this->line('SQL log: '.$this->logger->getLogFilePath());
         $this->newLine();
 
         if ($fromNumber > 1) {
@@ -106,6 +107,7 @@ class DatabaseMigrateCommand extends BaseCommand
         }
 
         $this->info('All SQL files executed successfully.');
+
         return self::SUCCESS;
     }
 }

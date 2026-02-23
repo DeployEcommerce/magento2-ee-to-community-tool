@@ -86,7 +86,7 @@ class DatabaseSnapshot implements SnapshotInterface
         $sequenceTablesPresent = $this->findSequenceTables($connection);
 
         return new SnapshotReport(
-            capturedAt: new \DateTimeImmutable(),
+            capturedAt: new \DateTimeImmutable,
             tableCounts: $tableCounts,
             tableChecksums: $tableChecksums,
             eeTablesPresent: $eeTablesPresent,
@@ -98,7 +98,7 @@ class DatabaseSnapshot implements SnapshotInterface
     public function save(SnapshotReport $report, string $directory): string
     {
         $timestamp = $report->capturedAt->format('Ymd-His');
-        $path = rtrim($directory, '/') . "/snapshot-before-{$timestamp}.json";
+        $path = rtrim($directory, '/')."/snapshot-before-{$timestamp}.json";
 
         $json = json_encode($report->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         file_put_contents($path, $json);
@@ -108,7 +108,7 @@ class DatabaseSnapshot implements SnapshotInterface
 
     public function load(string $path): SnapshotReport
     {
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             throw new \RuntimeException("Snapshot file not found: {$path}");
         }
 
@@ -131,6 +131,7 @@ class DatabaseSnapshot implements SnapshotInterface
                 $counts[$table] = null;
             }
         }
+
         return $counts;
     }
 
@@ -145,6 +146,7 @@ class DatabaseSnapshot implements SnapshotInterface
                 $checksums[$table] = null;
             }
         }
+
         return $checksums;
     }
 
@@ -152,11 +154,12 @@ class DatabaseSnapshot implements SnapshotInterface
     {
         $found = [];
         try {
-            $rows = $connection->query("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()");
+            $rows = $connection->query('SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()');
             $existing = array_column($rows, 'TABLE_NAME');
             $found = array_values(array_intersect(self::EE_TABLES, $existing));
         } catch (\Throwable) {
         }
+
         return $found;
     }
 
@@ -173,6 +176,7 @@ class DatabaseSnapshot implements SnapshotInterface
                 AND TABLE_NAME != 'paypal_settlement_report_row'
                 ORDER BY TABLE_NAME"
             );
+
             return array_column($rows, 'TABLE_NAME');
         } catch (\Throwable) {
             return [];
@@ -201,6 +205,7 @@ class DatabaseSnapshot implements SnapshotInterface
                 ORDER BY TABLE_NAME"
             );
             $allSequence = array_column($rows, 'TABLE_NAME');
+
             return array_values(array_intersect($allSequence, $eeSequenceTables));
         } catch (\Throwable) {
             return [];

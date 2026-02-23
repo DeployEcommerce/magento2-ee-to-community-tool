@@ -31,37 +31,52 @@ class ComposerMigrateCommand extends BaseCommand
 
         $magentoPath = $this->resolver->resolve($this->option('path'));
         $isDryRun = (bool) $this->option('dry-run');
-        $composerJsonPath = $magentoPath . '/composer.json';
+        $composerJsonPath = $magentoPath.'/composer.json';
 
-        if (!file_exists($composerJsonPath)) {
+        if (! file_exists($composerJsonPath)) {
             $this->error("composer.json not found at: {$composerJsonPath}");
+
             return self::FAILURE;
         }
 
         $analysis = $this->analyser->analyse($composerJsonPath);
 
-        if (!$this->analyser->isEnterpriseEdition($analysis)) {
+        if (! $this->analyser->isEnterpriseEdition($analysis)) {
             $this->warn('composer.json does not require magento/product-enterprise-edition. Nothing to do.');
+
             return self::SUCCESS;
         }
 
         $this->info("Enterprise Edition detected: {$analysis->eeVersion}");
 
         // Report replace section
-        $magentoReplaceCount = count(array_filter($analysis->replaceKeys, fn($k) => str_starts_with($k, 'magento/')));
+        $magentoReplaceCount = count(array_filter($analysis->replaceKeys, fn ($k) => str_starts_with($k, 'magento/')));
         if ($magentoReplaceCount > 0) {
             $this->line("  replace section: {$magentoReplaceCount} magento/* entries will be removed");
         }
 
         // Report conflicts
         $conflicts = $this->analyser->detectConflicts($analysis);
-        if (!empty($conflicts)) {
+        if (! empty($conflicts)) {
             $this->newLine();
             $this->warn('Potential conflicts detected:');
             foreach ($conflicts as $conflict) {
                 $this->line("  <fg=yellow>⚠</> {$conflict['package']} ({$conflict['version']})");
                 $this->line("    {$conflict['message']}");
             }
+        }
+
+        // Report enterprise repositories that may need changing
+        $enterpriseRepos = $this->analyser->detectEnterpriseRepositories($magentoPath);
+        if (! empty($enterpriseRepos)) {
+            $this->newLine();
+            $this->warn('Enterprise repositories detected:');
+            foreach ($enterpriseRepos as $repo) {
+                $this->line("  <fg=yellow>⚠</> Found in {$repo['file']}: {$repo['pattern']}");
+                $this->line("    {$repo['message']}");
+            }
+            $this->line('');
+            $this->line('  <fg=cyan>ℹ</> These repositories may need to be updated to their community equivalents.');
         }
 
         // Report what will change
@@ -77,18 +92,19 @@ class ComposerMigrateCommand extends BaseCommand
             $this->line("  <fg=green>+ add</>    {$pkg}: {$ver}");
         }
         if ($magentoReplaceCount > 0) {
-            $this->line("  <fg=yellow>~ clear</>  replace section (magento/* entries)");
+            $this->line('  <fg=yellow>~ clear</>  replace section (magento/* entries)');
         }
 
         if ($isDryRun) {
             $this->newLine();
             $this->warn('DRY RUN MODE — No changes written to composer.json.');
+
             return self::SUCCESS;
         }
 
         $this->newLine();
         $this->migrator->migrate($composerJsonPath, $analysis);
-        $this->info("composer.json updated successfully.");
+        $this->info('composer.json updated successfully.');
         $this->line("  Next step: run 'composer update --no-dev' to resolve CE dependencies.");
 
         return self::SUCCESS;

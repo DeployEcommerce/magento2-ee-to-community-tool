@@ -22,7 +22,7 @@ class MagentoDatabaseConnection implements DatabaseConnectionInterface
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
             \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
             \PDO::MYSQL_ATTR_MULTI_STATEMENTS => true,
-            \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4",
+            \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8mb4',
         ]);
     }
 
@@ -30,6 +30,7 @@ class MagentoDatabaseConnection implements DatabaseConnectionInterface
     {
         $this->assertConnected();
         $affected = $this->pdo->exec($sql);
+
         return $affected === false ? 0 : (int) $affected;
     }
 
@@ -59,6 +60,7 @@ class MagentoDatabaseConnection implements DatabaseConnectionInterface
     {
         $this->assertConnected();
         $stmt = $this->pdo->query($sql);
+
         return $stmt ? $stmt->fetchAll() : [];
     }
 

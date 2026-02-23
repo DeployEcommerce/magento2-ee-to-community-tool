@@ -47,6 +47,7 @@ class SnapshotComparator implements SnapshotComparatorInterface
                 $changes[$table] = ['before' => $beforeChecksum, 'after' => $afterChecksum];
             }
         }
+
         return $changes;
     }
 }

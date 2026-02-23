@@ -1,8 +1,8 @@
 <?php
 
-use App\Services\Database\SqlFileRunner;
 use App\Contracts\DatabaseConnectionInterface;
 use App\Contracts\SqlLoggerInterface;
+use App\Services\Database\SqlFileRunner;
 
 beforeEach(function () {
     $this->connection = Mockery::mock(DatabaseConnectionInterface::class);
@@ -40,13 +40,13 @@ test('splitStatements splits simple semicolon-delimited SQL', function () {
 test('splitStatements handles DELIMITER $$ blocks', function () {
     $runner = makeRunner('/tmp');
 
-    $sql = <<<SQL
-    DELIMITER \$\$
+    $sql = <<<'SQL'
+    DELIMITER $$
     CREATE PROCEDURE test_proc()
     BEGIN
         SELECT 1;
         SELECT 2;
-    END\$\$
+    END$$
     DELIMITER ;
     SELECT 3;
     SQL;
@@ -64,7 +64,7 @@ test('splitStatements ignores empty statements', function () {
     $sql = "SELECT 1;\n\n;\n\nSELECT 2;";
     $statements = $runner->splitStatements($sql);
 
-    $nonEmpty = array_values(array_filter($statements, fn($s) => $s !== ''));
+    $nonEmpty = array_values(array_filter($statements, fn ($s) => $s !== ''));
     expect($nonEmpty)->toHaveCount(2);
 });
 
@@ -86,16 +86,16 @@ test('splitStatements handles leading line comments', function () {
     $sql = "-- This is a comment\nSELECT 1;\n-- Another comment\nSELECT 2;";
     $statements = $runner->splitStatements($sql);
 
-    $nonEmpty = array_values(array_filter($statements, fn($s) => $s !== ''));
+    $nonEmpty = array_values(array_filter($statements, fn ($s) => $s !== ''));
     expect($nonEmpty)->toHaveCount(2);
     expect($nonEmpty[0])->toContain('SELECT 1');
     expect($nonEmpty[1])->toContain('SELECT 2');
 });
 
 test('runAll returns failure result on SQL error', function () {
-    $tempDir = sys_get_temp_dir() . '/sql_test_' . uniqid();
+    $tempDir = sys_get_temp_dir().'/sql_test_'.uniqid();
     mkdir($tempDir);
-    file_put_contents($tempDir . '/01_test.sql', 'DROP TABLE `non_existent_table`;');
+    file_put_contents($tempDir.'/01_test.sql', 'DROP TABLE `non_existent_table`;');
 
     $this->connection->shouldReceive('execute')
         ->andThrow(new \PDOException('Table does not exist'));
@@ -108,16 +108,16 @@ test('runAll returns failure result on SQL error', function () {
     expect($results[0]->error)->toContain('Table does not exist');
 
     // Cleanup
-    unlink($tempDir . '/01_test.sql');
+    unlink($tempDir.'/01_test.sql');
     rmdir($tempDir);
 });
 
 test('runFrom skips files before the given number', function () {
-    $tempDir = sys_get_temp_dir() . '/sql_test_' . uniqid();
+    $tempDir = sys_get_temp_dir().'/sql_test_'.uniqid();
     mkdir($tempDir);
-    file_put_contents($tempDir . '/01_first.sql', 'SELECT 1;');
-    file_put_contents($tempDir . '/02_second.sql', 'SELECT 2;');
-    file_put_contents($tempDir . '/03_third.sql', 'SELECT 3;');
+    file_put_contents($tempDir.'/01_first.sql', 'SELECT 1;');
+    file_put_contents($tempDir.'/02_second.sql', 'SELECT 2;');
+    file_put_contents($tempDir.'/03_third.sql', 'SELECT 3;');
 
     $this->connection->shouldReceive('execute')->once()->andReturn(0);
 
@@ -129,6 +129,6 @@ test('runFrom skips files before the given number', function () {
     expect($results[0]->filename)->toBe('03_third.sql');
 
     // Cleanup
-    array_map('unlink', glob($tempDir . '/*.sql'));
+    array_map('unlink', glob($tempDir.'/*.sql'));
     rmdir($tempDir);
 });

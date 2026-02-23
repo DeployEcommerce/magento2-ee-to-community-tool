@@ -40,7 +40,7 @@ class SqlFileRunner implements SqlRunnerInterface
      */
     private function getSqlFiles(): array
     {
-        if (!is_dir($this->sqlDirectory)) {
+        if (! is_dir($this->sqlDirectory)) {
             throw new \RuntimeException("No SQL files found in [{$this->sqlDirectory}]");
         }
 
@@ -139,10 +139,11 @@ class SqlFileRunner implements SqlRunnerInterface
             // Handle DELIMITER changes
             if (preg_match('/^DELIMITER\s+(\S+)\s*$/i', $trimmed, $matches)) {
                 $delimiter = $matches[1];
+
                 continue;
             }
 
-            $buffer .= $line . "\n";
+            $buffer .= $line."\n";
 
             // Check if buffer ends with current delimiter
             $bufferTrimmed = rtrim($buffer);

@@ -2,7 +2,6 @@
 
 namespace App\Services\Composer;
 
-use App\Contracts\ComposerAnalyserInterface;
 use App\ValueObjects\ComposerAnalysis;
 
 class ComposerMigrator
@@ -10,7 +9,7 @@ class ComposerMigrator
     public function migrate(string $composerJsonPath, ComposerAnalysis $analysis): void
     {
         $data = $analysis->data;
-        $analyser = new ComposerAnalyser();
+        $analyser = new ComposerAnalyser;
 
         // Remove EE, CE (if present), and Cloud metapackage from require
         foreach ($analyser->getPackagesToRemove($analysis) as $package) {
@@ -36,7 +35,7 @@ class ComposerMigrator
             }
         }
 
-        $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n";
+        $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n";
         file_put_contents($composerJsonPath, $json);
     }
 }

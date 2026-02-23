@@ -15,7 +15,7 @@ final readonly class DatabaseConfig
     public static function fromEnvPhp(array $envPhp): self
     {
         $connection = $envPhp['db']['connection']['default']
-            ?? throw new \InvalidArgumentException("Missing db.connection.default in env.php");
+            ?? throw new \InvalidArgumentException('Missing db.connection.default in env.php');
 
         $host = $connection['host'] ?? '127.0.0.1';
         $port = 3306;
@@ -28,8 +28,8 @@ final readonly class DatabaseConfig
         return new self(
             host: $host,
             port: $port,
-            dbname: $connection['dbname'] ?? throw new \InvalidArgumentException("Missing dbname in env.php"),
-            username: $connection['username'] ?? throw new \InvalidArgumentException("Missing username in env.php"),
+            dbname: $connection['dbname'] ?? throw new \InvalidArgumentException('Missing dbname in env.php'),
+            username: $connection['username'] ?? throw new \InvalidArgumentException('Missing username in env.php'),
             password: $connection['password'] ?? '',
         );
     }

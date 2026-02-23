@@ -7,12 +7,13 @@ use App\Contracts\SqlLoggerInterface;
 class SqlLogger implements SqlLoggerInterface
 {
     private string $logFilePath;
+
     private bool $initialized = false;
 
     public function __construct()
     {
         $timestamp = date('Ymd-His');
-        $this->logFilePath = getcwd() . "/ee-to-ce-migration-{$timestamp}.sql.log";
+        $this->logFilePath = getcwd()."/ee-to-ce-migration-{$timestamp}.sql.log";
     }
 
     public function log(string $sql, int $affectedRows, float $durationMs): void
@@ -24,7 +25,7 @@ class SqlLogger implements SqlLoggerInterface
             $timestamp,
             $affectedRows,
             $durationMs,
-            rtrim($sql, ';') . ';'
+            rtrim($sql, ';').';'
         );
         file_put_contents($this->logFilePath, $entry, FILE_APPEND);
     }
@@ -37,7 +38,7 @@ class SqlLogger implements SqlLoggerInterface
             "-- [%s] ERROR: %s\n%s\n\n",
             $timestamp,
             $e->getMessage(),
-            rtrim($sql, ';') . ';'
+            rtrim($sql, ';').';'
         );
         file_put_contents($this->logFilePath, $entry, FILE_APPEND);
     }

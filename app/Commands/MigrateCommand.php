@@ -50,6 +50,7 @@ class MigrateCommand extends BaseCommand
             $this->newLine();
             $this->error('Database migration failed. Aborting.');
             $this->line('  Fix the issue above and re-run with --from=N to resume.');
+
             return self::FAILURE;
         }
 
@@ -65,6 +66,7 @@ class MigrateCommand extends BaseCommand
         if ($exitCode !== self::SUCCESS) {
             $this->newLine();
             $this->error('Composer migration failed. Aborting.');
+
             return self::FAILURE;
         }
 
@@ -83,7 +85,7 @@ class MigrateCommand extends BaseCommand
         if ($exitCode === self::SUCCESS) {
             $this->info('Migration complete! Run the following to finish:');
             $this->newLine();
-            $this->line('  1. cd ' . $magentoPath);
+            $this->line('  1. cd '.$magentoPath);
             $this->line('  2. composer update --no-dev');
             $this->line('  3. bin/magento setup:upgrade');
             $this->line('  4. bin/magento setup:di:compile');

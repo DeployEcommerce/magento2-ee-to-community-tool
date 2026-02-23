@@ -16,7 +16,7 @@ function makeReport(array $overrides = []): SnapshotReport
 }
 
 test('assertSuccess returns true when all EE indicators are empty', function () {
-    $comparator = new SnapshotComparator();
+    $comparator = new SnapshotComparator;
 
     $before = makeReport(['eeTablesPresent' => ['magento_staging_update', 'magento_banner']]);
     $after = makeReport();
@@ -26,7 +26,7 @@ test('assertSuccess returns true when all EE indicators are empty', function () 
 });
 
 test('assertSuccess returns false when EE tables remain', function () {
-    $comparator = new SnapshotComparator();
+    $comparator = new SnapshotComparator;
 
     $before = makeReport();
     $after = makeReport(['eeTablesPresent' => ['magento_staging_update']]);
@@ -36,7 +36,7 @@ test('assertSuccess returns false when EE tables remain', function () {
 });
 
 test('assertSuccess returns false when row_id columns remain', function () {
-    $comparator = new SnapshotComparator();
+    $comparator = new SnapshotComparator;
 
     $before = makeReport();
     $after = makeReport(['rowIdColumnsPresent' => ['catalog_product_entity']]);
@@ -46,7 +46,7 @@ test('assertSuccess returns false when row_id columns remain', function () {
 });
 
 test('assertSuccess returns false when sequence tables remain', function () {
-    $comparator = new SnapshotComparator();
+    $comparator = new SnapshotComparator;
 
     $before = makeReport();
     $after = makeReport(['sequenceTablesPresent' => ['sequence_order_1']]);
@@ -56,7 +56,7 @@ test('assertSuccess returns false when sequence tables remain', function () {
 });
 
 test('compare reports correct row count deltas', function () {
-    $comparator = new SnapshotComparator();
+    $comparator = new SnapshotComparator;
 
     $before = makeReport(['tableCounts' => ['catalog_product_entity' => 100, 'cms_page' => 10]]);
     $after = makeReport(['tableCounts' => ['catalog_product_entity' => 98, 'cms_page' => 8]]);
@@ -68,7 +68,7 @@ test('compare reports correct row count deltas', function () {
 });
 
 test('compare reports EE tables removed count', function () {
-    $comparator = new SnapshotComparator();
+    $comparator = new SnapshotComparator;
 
     $before = makeReport(['eeTablesPresent' => ['magento_staging_update', 'magento_banner', 'magento_rma']]);
     $after = makeReport(['eeTablesPresent' => []]);
@@ -80,7 +80,7 @@ test('compare reports EE tables removed count', function () {
 });
 
 test('compare detects checksum changes', function () {
-    $comparator = new SnapshotComparator();
+    $comparator = new SnapshotComparator;
 
     $before = makeReport(['tableChecksums' => ['catalog_product_entity' => 'abc123']]);
     $after = makeReport(['tableChecksums' => ['catalog_product_entity' => 'xyz789']]);
